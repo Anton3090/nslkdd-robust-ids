@@ -1,28 +1,26 @@
-# train.py
-import torch
-from model import IDSModel
-from utils.preprocessing import load_data
-from torch.utils.data import DataLoader
+# src/train.py
 
-def train():
-    X_train, y_train, X_test, y_test = load_data()
-    model = IDSModel(input_dim=X_train.shape[1], num_classes=len(set(y_train)))
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+from model import IDSModel
+
+def train_model(X_train, y_train, input_dim, epochs=10, batch_size=128, lr=0.001):
+    model = IDSModel(input_dim)
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    train_loader = DataLoader(list(zip(X_train, y_train)), batch_size=64, shuffle=True)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)
+    train_loader = DataLoader(TensorDataset(X_train_tensor, y_train_tensor), batch_size=batch_size, shuffle=True)
 
     model.train()
-    for epoch in range(10):
-        total_loss = 0
-        for X_batch, y_batch in train_loader:
+    for epoch in range(epochs):
+        for xb, yb in train_loader:
+            preds = model(xb)
+            loss = criterion(preds, yb)
             optimizer.zero_grad()
-            outputs = model(X_batch.float())
-            loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
-            total_loss += loss.item()
-        print(f"Epoch {epoch+1}, Loss: {total_loss/len(train_loader):.4f}")
+        print(f"Epoch {epoch+1} - Loss: {loss.item():.4f}")
 
-if __name__ == "__main__":
-    train()
-  
+    return model
