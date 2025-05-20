@@ -45,7 +45,7 @@ path = kagglehub.dataset_download("hassan06/nslkdd")
 ## 🛠️ Installation
 
 ```bash
-git clone https://github.com/yourusername/nslkdd-robust-ids.git
+git clone https://github.com/Anton3090/nslkdd-robust-ids.git
 cd nslkdd-robust-ids
 pip install -r requirements.txt
 ```
