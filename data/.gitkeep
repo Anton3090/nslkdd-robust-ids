@@ -1,0 +1,2 @@
+import kagglehub
+path = kagglehub.dataset_download("hassan06/nslkdd")
