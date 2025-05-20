@@ -19,8 +19,8 @@ A deep learning-based Intrusion Detection System (IDS) trained on the NSL-KDD da
 ```
 nslkdd-robust-ids/
 ├── data/               # Dataset download instructions (KaggleHub)
-├── notebooks/          # Jupyter notebooks for experimentation
-├── src/                # Core Python modules (training, model, attack, etc.)
+├── notebooks/          # kaggel notebooks for experimentation
+├── src/                # Core Python modules
 ├── realtime/           # Real-time detection using Scapy
 ├── utils/              # Helper utilities
 ├── requirements.txt    # Dependencies
