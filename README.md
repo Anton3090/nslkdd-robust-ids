@@ -120,17 +120,27 @@ Sample logic:
 
 ```python
 from scapy.all import sniff
-from src.model import load_model
-from utils.preprocessing import preprocess_packet
+import torch
+import numpy as np
 
-model = load_model("Model/ids_model.pth")
+# Load model and scaler
+model.load_state_dict(torch.load("Model/ids_model.pth"))
+model.eval()
 
-def predict_packet(packet):
-    features = preprocess_packet(packet)
-    pred = model(torch.tensor(features).float().unsqueeze(0))
-    print("ALERT 🚨" if pred.argmax().item() == 1 else "Normal ✅")
+# Dummy feature extractor for packet
+def extract_features(pkt):
+    return np.array([len(pkt), pkt.ttl if hasattr(pkt, 'ttl') else 0, pkt.dport if hasattr(pkt, 'dport') else 0])
 
-sniff(prn=predict_packet, store=0)
+def process_packet(pkt):
+    features = extract_features(pkt)
+    features = scaler.transform([features])
+    tensor = torch.tensor(features, dtype=torch.float32)
+    pred = model(tensor)
+    label = torch.argmax(pred).item()
+    print(f"Packet classified as: {'attack' if label else 'normal'}")
+
+sniff(prn=process_packet, count=10)
+
 ```
 
 > Note: Ensure features extracted match the trained model’s input structure.
