@@ -1,6 +1,6 @@
 # 🔐 NSL-KDD Intrusion Detection System with Adversarial Robustness
 
-A deep learning-based Intrusion Detection System (IDS) trained on the NSL-KDD dataset. This project integrates PyTorch and the Adversarial Robustness Toolbox (ART) to evaluate model robustness against adversarial attacks (e.g., FGSM) and supports real-time packet detection with Scapy.
+A deep learning-based Intrusion Detection System (IDS) trained on the NSL-KDD dataset. This project integrates PyTorch and the Adversarial Robustness Toolbox (ART) to evaluate model robustness against adversarial attacks (FGSM) and supports real-time packet detection with Scapy.
 
 ---
 
