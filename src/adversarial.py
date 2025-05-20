@@ -1,24 +1,22 @@
-# adversarial.py
-import torch
+# src/adversarial.py
+
+import numpy as np
 from art.estimators.classification import PyTorchClassifier
 from art.attacks.evasion import FastGradientMethod
-from model import IDSModel
-from utils.preprocessing import load_data
 
-def generate_adversarial_examples():
-    X_train, y_train, X_test, y_test = load_data()
-    model = IDSModel(input_dim=X_train.shape[1], num_classes=len(set(y_train)))
-    model.load_state_dict(torch.load("model.pth"))
-    model.eval()
+def adversarial_accuracy(model, X_test, y_test, loss_fn, optimizer):
+    classifier = PyTorchClassifier(
+        model=model,
+        loss=loss_fn,
+        optimizer=optimizer,
+        input_shape=(X_test.shape[1],),
+        nb_classes=2,
+    )
 
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    classifier = PyTorchClassifier(model=model, loss=criterion, optimizer=optimizer,
-                                   input_shape=(X_train.shape[1],), nb_classes=len(set(y_train)))
-
+    X_test = X_test.astype(np.float32)
     fgsm = FastGradientMethod(estimator=classifier, eps=0.1)
-    X_test_adv = fgsm.generate(X_test.numpy())
-    print("Generated adversarial examples")
+    X_test_adv = fgsm.generate(X_test)
+    preds = np.argmax(classifier.predict(X_test_adv), axis=1)
 
-if __name__ == "__main__":
-    generate_adversarial_examples()
+    acc = np.mean(preds == y_test)
+    print("Robust Accuracy under FGSM attack:", acc)
