@@ -123,7 +123,7 @@ from scapy.all import sniff
 from src.model import load_model
 from utils.preprocessing import preprocess_packet
 
-model = load_model("models/trained_model.pth")
+model = load_model("Model/ids_model.pth")
 
 def predict_packet(packet):
     features = preprocess_packet(packet)
