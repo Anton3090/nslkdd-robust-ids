@@ -188,8 +188,8 @@ print("Sniffing finished.")
 
 | Dataset       | Accuracy |
 |---------------|----------|
-| Clean Test    | 86.7%    |
-| FGSM Attack   | 81.9%    |
+| Clean Test    | 87.2%    |
+| FGSM Attack   | 84.5%    |
 
 ---
 
