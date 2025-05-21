@@ -53,14 +53,17 @@ pip install -r requirements.txt
 ### Requirements
 
 ```
-torch
-pandas
-numpy
-scikit-learn
-matplotlib
-adversarial-robustness-toolbox
-kagglehub
-scapy
+numpy>=1.21.0
+pandas>=1.3.0
+scikit-learn>=1.0.0
+torch>=1.10.0
+torchvision>=0.11.0
+matplotlib>=3.4.0
+seaborn>=0.11.0
+scapy>=2.4.5
+tqdm>=4.62.0
+adversarial-robustness-toolbox>=1.12.1
+
 ```
 
 ---
