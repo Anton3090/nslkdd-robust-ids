@@ -119,27 +119,64 @@ Inside `realtime/detect.py`, we:
 Sample logic:
 
 ```python
-from scapy.all import sniff
+from scapy.all import sniff, IP, TCP, UDP
 import torch
+import torch.nn as nn
 import numpy as np
+import joblib
+from datetime import datetime
+
+# Define the model
+class IDSModel(nn.Module):
+    def __init__(self, input_dim):
+        super(IDSModel, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim, 64),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, 2)
+        )
+    def forward(self, x):
+        return self.layers(x)
 
 # Load model and scaler
-model.load_state_dict(torch.load("Model/ids_model.pth"))
+model = IDSModel(input_dim=42)
+model.load_state_dict(torch.load("ids_model.pth"))
 model.eval()
 
-# Dummy feature extractor for packet
+scaler = joblib.load("scaler.save")
+
+# Feature extraction function
 def extract_features(pkt):
-    return np.array([len(pkt), pkt.ttl if hasattr(pkt, 'ttl') else 0, pkt.dport if hasattr(pkt, 'dport') else 0])
+    try:
+        length = len(pkt)
+        ttl = pkt[IP].ttl if IP in pkt else 0
+        dport = pkt[TCP].dport if TCP in pkt else (pkt[UDP].dport if UDP in pkt else 0)
+        features = [length, ttl, dport]
+        features += [0] * (42 - len(features))  # Pad to 42 features
+        return np.array(features).reshape(1, -1)
+    except:
+        return np.zeros((1, 42))  # Return dummy on failure
 
-def process_packet(pkt):
+# Classify and log packet
+def classify_packet(pkt):
     features = extract_features(pkt)
-    features = scaler.transform([features])
-    tensor = torch.tensor(features, dtype=torch.float32)
-    pred = model(tensor)
-    label = torch.argmax(pred).item()
-    print(f"Packet classified as: {'attack' if label else 'normal'}")
+    scaled = scaler.transform(features)
+    tensor = torch.tensor(scaled, dtype=torch.float32)
+    output = model(tensor)
+    pred = torch.argmax(output).item()
+    label = "attack" if pred == 1 else "normal"
 
-sniff(prn=process_packet, count=10)
+    print(f"[{datetime.now()}] Packet classified as: {label}")
+    with open("log.txt", "a") as f:
+        f.write(f"{datetime.now()} | {pkt.summary()} | Result: {label}\n")
+
+# Start sniffing for 10 seconds
+print("Sniffing packets for 10 seconds...")
+sniff(prn=classify_packet, timeout=10, store=0)
+print("Sniffing finished.")
 
 ```
 
